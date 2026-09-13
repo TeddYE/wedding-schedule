@@ -129,7 +129,7 @@ module.exports = [
       "Coordinate with photographers on the solemnisation filming flow.",
       "Coordinate photo setups during the banquet — march-in, toasting, cake cutting.",
     ] },
-  { section: "Afternoon", track: "setup", side: "everyone", start: "17:15", end: "18:00",
+  { section: "Afternoon", track: "setup", side: "everyone", start: "17:15", end: "18:15",
     title: "Musical Touch band & sound setup", location: "Fullerton Hotel — Ballroom",
     poc: ["junle", "clarence", "julian"], deadline: null,
     tasks: [
@@ -164,7 +164,7 @@ module.exports = [
     tasks: ["Tea ceremony immediately following the solemnisation."] },
   { section: "Solemnisation", track: "setup", side: "everyone", start: "18:00", end: "18:30",
     title: "Vendor briefing & crew dinner", location: "Fullerton Hotel — Reception Area",
-    poc: ["xinli", "mingfeng", "qiaohan", "julian"], deadline: null,
+    poc: ["xinli", "mingfeng", "qiaohan"], deadline: null,
     tasks: [
       "Briefing with the emcee and technicians on the full program flow.",
       "Grabfood ordered for the band and crew dinner — MingFeng to arrange.",
