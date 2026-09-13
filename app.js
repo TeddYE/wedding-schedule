@@ -6,7 +6,10 @@ import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./firebase-config.js";
-import { WEDDING_DATE, SEATING, findVendorPhone } from "./data.js";
+import {
+  WEDDING_DATE, SEATING, PEOPLE,
+  getPerson, personPhone, resolvePersonId, peopleWithDuties,
+} from "./data.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
@@ -16,6 +19,10 @@ let events = [];
 let isEditor = false;
 let currentEditId = null;
 let hasAutoScrolled = false;
+// View filters — "setup" work is hidden by default so the timeline reads as the
+// guest-facing flow; organisers toggle it back on.
+let showSetup = false;
+let focusPersonId = null;
 
 // ---------- helpers ----------
 function escapeHtml(str) {
@@ -37,17 +44,29 @@ function fmtDuration(ms) {
   const h = Math.floor(totalMin / 60); const m = totalMin % 60;
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
+// The list the timeline actually renders: setup work hidden unless asked for,
+// narrowed to one person when "my duties" is active.
+function visibleEvents() {
+  let list = sortedEvents();
+  if (!showSetup) list = list.filter((e) => (e.track || "program") !== "setup");
+  if (focusPersonId) {
+    list = list.filter((e) => (e.poc || []).some((t) => resolvePersonId(t) === focusPersonId));
+  }
+  return list;
+}
 function sortedEvents() {
   return events.slice().sort((a, b) => (a.start !== b.start ? a.start.localeCompare(b.start) : (a.order ?? 0) - (b.order ?? 0)));
 }
-function pocChip(name) {
-  const phone = findVendorPhone(name);
-  return phone
-    ? `<button type="button" class="chip tappable" data-action="poc" data-name="${escapeHtml(name)}">${escapeHtml(name)}</button>`
-    : `<span class="chip">${escapeHtml(name)}</span>`;
+function pocChip(token) {
+  const p = getPerson(token);
+  const cls = `chip role-${p.role}${p.id === focusPersonId ? " focus" : ""}`;
+  const label = escapeHtml(p.name);
+  return p.phone
+    ? `<button type="button" class="${cls} tappable" data-action="poc" data-token="${escapeHtml(token)}" title="${escapeHtml(p.company || p.note || "")}">${label} ☎</button>`
+    : `<span class="${cls}" title="${escapeHtml(p.note || p.company || "")}">${label}</span>`;
 }
-function handlePocClick(name) {
-  const phone = findVendorPhone(name);
+function handlePocClick(token) {
+  const phone = personPhone(token);
   if (phone) window.location.href = `tel:${phone.replace(/[^+\d]/g, "")}`;
 }
 
@@ -60,7 +79,10 @@ function computeHandoffWarnings(list) {
       const a = list[i], b = list[j];
       const gap = toMin(b.start) - toMin(a.end);
       if (gap < 0 || gap > 5) continue;
-      const shared = (a.poc || []).filter((p) => (b.poc || []).includes(p));
+      const bIds = (b.poc || []).map(resolvePersonId).filter(Boolean);
+      const shared = (a.poc || [])
+        .filter((p) => bIds.includes(resolvePersonId(p)))
+        .map((p) => getPerson(p).name);
       if (!shared.length) continue;
       if (!warnings.has(a.id)) warnings.set(a.id, []);
       warnings.get(a.id).push({ person: shared.join(", "), next: b.title });
@@ -82,7 +104,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 // ---------- now/next bar ----------
 function renderNowNextBar() {
   const bar = document.getElementById("nowNextBar");
-  const list = sortedEvents();
+  const list = visibleEvents();
   if (!list.length) { bar.textContent = "Schedule not loaded yet."; return; }
   const now = new Date();
   const first = withDate(list[0].start);
@@ -99,7 +121,7 @@ function renderNowNextBar() {
   let html = "";
   if (current.length) {
     const c = current[0];
-    const meta = [c.location ? `📍 ${escapeHtml(c.location)}` : "", c.poc?.length ? `PIC: ${escapeHtml(c.poc.slice(0, 2).join(", "))}` : "", current.length > 1 ? `+${current.length - 1} more now` : ""].filter(Boolean).join(" · ");
+    const meta = [c.location ? `📍 ${escapeHtml(c.location)}` : "", c.poc?.length ? `PIC: ${escapeHtml(c.poc.slice(0, 2).map((t) => getPerson(t).name).join(", "))}` : "", current.length > 1 ? `+${current.length - 1} more now` : ""].filter(Boolean).join(" · ");
     html += `<div class="nn-item"><span class="nn-label now">Now</span><span class="nn-title">${escapeHtml(c.title)}</span><span class="nn-meta">${meta}</span></div>`;
   }
   if (next) {
@@ -130,6 +152,7 @@ function buildEventCard(ev, now, nextId, handoffWarnings) {
   if (isNext) badges.push(`<span class="badge next">Next</span>`);
   if (isDone) badges.push(`<span class="badge done">Done</span>`);
   if (isDelayed) badges.push(`<span class="badge delayed">Delayed</span>`);
+  if ((ev.track || "program") === "setup") badges.push(`<span class="badge setup">Setup</span>`);
 
   return `
     <article class="ev-card side-${side.cls} ${isNow ? "now" : ""} ${isDone ? "done" : ""}" data-id="${ev.id}">
@@ -153,11 +176,46 @@ function buildEventCard(ev, now, nextId, handoffWarnings) {
     </article>`;
 }
 
+// ---------- filter bar ----------
+// Two controls that matter on the day: whose duties am I looking at, and do I
+// want the backstage setup work mixed in.
+function renderFilterBar() {
+  const root = document.getElementById("filterBar");
+  if (!root) return;
+  const people = peopleWithDuties(events);
+  const setupCount = sortedEvents().filter((e) => (e.track || "program") === "setup").length;
+  root.innerHTML = `
+    <label class="filter-field">
+      <span>Show duties for</span>
+      <select id="personFilter">
+        <option value="">Everyone</option>
+        ${people.map((p) => `<option value="${p.id}" ${p.id === focusPersonId ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("")}
+      </select>
+    </label>
+    <button type="button" class="filter-toggle ${showSetup ? "on" : ""}" id="setupToggle">
+      ${showSetup ? "✓ " : ""}Setup &amp; vendor work${setupCount ? ` (${setupCount})` : ""}
+    </button>`;
+  document.getElementById("personFilter").addEventListener("change", (e) => {
+    focusPersonId = e.target.value || null;
+    hasAutoScrolled = true;
+    renderTimeline();
+  });
+  document.getElementById("setupToggle").addEventListener("click", () => {
+    showSetup = !showSetup;
+    hasAutoScrolled = true;
+    renderTimeline();
+  });
+}
+
 function renderTimeline() {
   const root = document.getElementById("timelineRoot");
-  const list = sortedEvents();
+  renderFilterBar();
+  const list = visibleEvents();
   if (!list.length) {
-    root.innerHTML = `<p class="empty-note">No events yet.${isEditor ? " Tap Edit schedule to start." : ""}</p>`;
+    const why = focusPersonId
+      ? `No duties listed for <b>${escapeHtml(PEOPLE[focusPersonId]?.name || "")}</b>${showSetup ? "" : " in the guest-facing flow — try showing setup work"}.`
+      : `No events yet.${isEditor ? " Tap Edit schedule to start." : ""}`;
+    root.innerHTML = `<p class="empty-note">${why}</p>`;
     renderNowNextBar();
     return;
   }
@@ -179,7 +237,7 @@ function renderTimeline() {
 // ---------- single delegated listener for the whole timeline root ----------
 document.getElementById("timelineRoot").addEventListener("click", (e) => {
   const pocBtn = e.target.closest('[data-action="poc"]');
-  if (pocBtn) { handlePocClick(pocBtn.dataset.name); return; }
+  if (pocBtn) { handlePocClick(pocBtn.dataset.token); return; }
 
   const editBtn = e.target.closest('[data-action="edit"]');
   if (editBtn) { openEventModal(editBtn.dataset.id); return; }
@@ -316,6 +374,7 @@ const evStart = document.getElementById("evStart");
 const evEnd = document.getElementById("evEnd");
 const evSection = document.getElementById("evSection");
 const evSide = document.getElementById("evSide");
+const evTrack = document.getElementById("evTrack");
 const evTitle = document.getElementById("evTitle");
 const evLocation = document.getElementById("evLocation");
 const evDeadline = document.getElementById("evDeadline");
@@ -334,10 +393,11 @@ function openEventModal(id) {
   evEnd.value = ev?.end || "";
   evSection.value = ev?.section || "Morning";
   evSide.value = ev?.side || "everyone";
+  evTrack.value = ev?.track || "program";
   evTitle.value = ev?.title || "";
   evLocation.value = ev?.location || "";
   evDeadline.value = ev?.deadline || "";
-  evPoc.value = (ev?.poc || []).join(", ");
+  evPoc.value = (ev?.poc || []).map((t) => getPerson(t).name).join(", ");
   evTasks.value = (ev?.tasks || []).join("\n");
   evStatus.value = ev?.status || "";
   eventDeleteBtn.style.display = ev ? "inline-block" : "none";
@@ -355,12 +415,16 @@ document.getElementById("eventSave").addEventListener("click", async () => {
   const payload = {
     section: evSection.value,
     side: evSide.value,
+    track: evTrack.value,
     start: evStart.value,
     end: evEnd.value,
     title: evTitle.value.trim(),
     location: evLocation.value.trim(),
     deadline: evDeadline.value.trim() || null,
-    poc: evPoc.value.split(",").map((s) => s.trim()).filter(Boolean),
+    // Store canonical ids where the name is recognised; keep the raw text otherwise
+    // so an unknown helper can still be typed in without being silently dropped.
+    poc: evPoc.value.split(",").map((s) => s.trim()).filter(Boolean)
+      .map((t) => resolvePersonId(t) || t),
     tasks: evTasks.value.split("\n").map((s) => s.trim()).filter(Boolean),
     status: evStatus.value,
   };

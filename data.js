@@ -3,75 +3,174 @@
 // seeded once from seed/seed-data.js. This file only holds data that stays fixed.
 export const WEDDING_DATE = "2026-09-20";
 
-export const POCS = [
-  { section: "Logistics", role: "Main POC for bride and groom — facilitate conversations, safekeep & ensure Groom & Bride packlist is accounted for",
-    bridesmaid: ["Shuyin", "Justine"], groomsmen: ["Junle", "Clarence"] },
-  { section: "Photo-taking", role: "Bridal party photoshoot at Fullerton Hotel before Solemnisation (grooms & groomsmen, bride & bridesmaid, with family)",
-    bridesmaid: ["Shuyin", "Xinxuan"], groomsmen: ["Yao Leyang"] },
-  { section: "Solemnisation", role: "Manage decoration & flow — floral table set up by Mirage Florist before 5:30 PM, liaise with Solemniser Mr Dragonic Lee, march-in music (3.5mm audio jack)",
-    bridesmaid: ["Xinxuan", "Jieyi"], groomsmen: ["Aaron"] },
-  { section: "Reception", role: "Reception table setup & guest seating, registration table (open before 6:30 PM), parking coupons, wishing cards/lucky draw, 2 laptops needed, safekeep 2 angbao boxes, coordinate with banquet manager on seating changes",
-    bridesmaid: ["Weiqing", "Jieyi", "Jingyang (bride's brother)"], groomsmen: ["Tan Jun Hong", "Wu Yueze"] },
-  { section: "Reception", role: "Coordinate reception area vendors — setup/teardown timing, wifi/water/socket points, crowd control, grabfood dinner for vendors (Musical Touch dinner 6 PM)",
-    bridesmaid: ["Xinli", "MingFeng"], groomsmen: ["Ryan Jee", "Zhang Yuntong"] },
-  { section: "Ballroom", role: "Coordinate ballroom vendors, full program flow with emcee (QiaoHan), cue couple for march-ins, coordinate photographers for post-march-in photos",
-    bridesmaid: ["Justine"], groomsmen: ["Junle", "Clarence", "Aaron"] },
-  { section: "AV", role: "Play videos, music etc.",
-    bridesmaid: [], groomsmen: ["Yao Leyang", "Tan Jun Hong"] },
-];
+// ---------------------------------------------------------------------------
+// PEOPLE — the single source of truth for every human on the day.
+//
+// Events reference these by *id* (e.g. poc: ["shuyin", "imelda"]), never by
+// free text. That is what keeps a chip tappable: a typo in an event used to
+// silently produce a dead grey chip with no role colour and no phone number.
+//
+//   role:    bridesmaid | groomsman | vendor | family | couple | group
+//   phone:   primary contact number — makes the chip tap-to-call
+//   company: vendor's business name, shown on the contact card
+//   note:    anything the bridal party should know before calling
+// ---------------------------------------------------------------------------
+export const PEOPLE = {
+  // ---- bridesmaids ----
+  shuyin:    { name: "Shuyin",    role: "bridesmaid" },
+  justine:   { name: "Justine",   role: "bridesmaid" },
+  xinxuan:   { name: "Xinxuan",   role: "bridesmaid" },
+  jieyi:     { name: "Jieyi",     role: "bridesmaid" },
+  weiqing:   { name: "Weiqing",   role: "bridesmaid" },
+  xinli:     { name: "Xinli",     role: "bridesmaid" },
+  mingfeng:  { name: "MingFeng",  role: "bridesmaid" },
+  chiaqing:  { name: "Chiaqing",  role: "bridesmaid" },
 
-export const VENDORS = [
-  { section: "Morning Preparations", role: "Photographer & Videographer", company: "Depair", contact: "Pauline", phone: "+65 8685 6895", timing: "7:15 AM (bride side), 7:30 AM (groom side)" },
-  { section: "Morning Preparations", role: "Makeup Artist", company: "Autelier Imelda", contact: "Imelda / Jessica", phone: "+65 8186 4688 / +65 8893 3389", timing: "5:00 AM" },
-  { section: "Morning Preparations", role: "Car Rental", company: "", contact: "", phone: "", timing: "" },
-  { section: "Solemnisation", role: "Solemniser", company: "Mr Lee (Kee Siang Lee)", contact: "Mr Lee", phone: "+65 9663 6334", timing: "5:45 PM" },
-  { section: "Solemnisation", role: "Florist", company: "Mirage Florist", contact: "Priscilla Lim", phone: "+65 8588 8769", timing: "" },
-  { section: "Banquet", role: "Photographer & Videographer", company: "Depair", contact: "Pauline", phone: "+65 8685 6895", timing: "" },
-  { section: "Banquet", role: "Wedding Venue Deco", company: "Victoria Wedding", contact: "Scarlet / Shawn", phone: "+65 8088 2242 / +65 9159 3670", timing: "4:00 PM (setup done by 5:30-5:45 PM)" },
-  { section: "Banquet", role: "Banquet Manager", company: "Fullerton Hotel Singapore", contact: "Zahera (for now)", phone: "", timing: "" },
-  { section: "Banquet", role: "Makeup Artist", company: "Autelier Imelda", contact: "Imelda / Jessica", phone: "+65 8186 4688 / +65 8893 3389", timing: "5:30 AM (bride's house), 2 PM (Fullerton hotel)" },
-  { section: "Banquet", role: "Wedding Band & Emcee", company: "Musical Touch", contact: "Julian", phone: "+65 8770 8649", timing: "6 PM, teardown 11 PM" },
-  { section: "Banquet", role: "Photobooth & Telebooth", company: "1010Media", contact: "Alistair", phone: "+65 9668 1500", timing: "" },
-  { section: "Banquet", role: "Ice Cream Live Station", company: "Birds of Paradise", contact: "", phone: "", timing: "" },
-  { section: "Logistics", role: "Safekeep & ensure Groom & Bride packlist accounted for", company: "Groomsmen & Bridesmaid", contact: "", phone: "", timing: "", picInCharge: "Shuyin" },
-  { section: "Logistics", role: "Reception table", company: "Groomsmen & Bridesmaid", contact: "", phone: "", timing: "", picInCharge: "Weiqing, Xinxuan, Chiaqing" },
-];
+  // ---- groomsmen ----
+  junle:     { name: "Junle",       role: "groomsman" },
+  clarence:  { name: "Clarence",    role: "groomsman" },
+  aaron:     { name: "Aaron",       role: "groomsman" },
+  yaoleyang: { name: "Yao Leyang",  role: "groomsman" },
+  junhong:   { name: "Tan Jun Hong", role: "groomsman" },
+  yueze:     { name: "Wu Yueze",    role: "groomsman" },
+  ryanjee:   { name: "Ryan Jee",    role: "groomsman" },
+  yuntong:   { name: "Zhang Yuntong", role: "groomsman" },
 
-// ---------- role lookup (for role filtering + tappable contacts) ----------
-function stripAnnotation(name) {
-  return name.replace(/\s*\([^)]*\)/g, "").trim();
+  // ---- family & couple ----
+  bride:     { name: "Bride",     role: "couple" },
+  groom:     { name: "Groom",     role: "couple" },
+  jingyang:  { name: "Jingyang",  role: "family", note: "Bride's brother" },
+  sheryl:    { name: "Sheryl",    role: "family", note: "Role unconfirmed — please confirm" },
+  parents:   { name: "Parents",   role: "group" },
+  bmgm:      { name: "Bridesmaids & Groomsmen", role: "group" },
+
+  // ---- vendors ----
+  pauline:   { name: "Pauline",       role: "vendor", company: "Depair", phone: "+65 8685 6895", note: "Photographer & videographer" },
+  imelda:    { name: "Imelda",        role: "vendor", company: "Autelier Imelda", phone: "+65 8186 4688", note: "Makeup artist" },
+  jessica:   { name: "Jessica",       role: "vendor", company: "Autelier Imelda", phone: "+65 8893 3389", note: "Makeup artist" },
+  mrlee:     { name: "Mr Lee",        role: "vendor", company: "Kee Siang Lee", phone: "+65 9663 6334", note: "Solemniser" },
+  priscilla: { name: "Priscilla Lim", role: "vendor", company: "Mirage Florist", phone: "+65 8588 8769", note: "Florist" },
+  scarlet:   { name: "Scarlet",       role: "vendor", company: "Victoria Wedding", phone: "+65 8088 2242", note: "Venue decoration" },
+  shawn:     { name: "Shawn",         role: "vendor", company: "Victoria Wedding", phone: "+65 9159 3670", note: "Venue decoration" },
+  zahera:    { name: "Zahera",        role: "vendor", company: "Fullerton Hotel Singapore", note: "Banquet manager — number to be confirmed" },
+  julian:    { name: "Julian",        role: "vendor", company: "Musical Touch", phone: "+65 8770 8649", note: "Wedding band & sound" },
+  qiaohan:   { name: "Qiao Han",      role: "vendor", company: "Musical Touch", note: "Emcee" },
+  alistair:  { name: "Alistair",      role: "vendor", company: "1010Media", phone: "+65 9668 1500", note: "Photobooth & telebooth" },
+  birds:     { name: "Birds of Paradise", role: "vendor", note: "Ice cream live station" },
+};
+
+// Accepts historical / hand-typed spellings so anything still stored in
+// Firestore as free text keeps resolving to the right person.
+const ALIASES = {
+  "yao": "yaoleyang",
+  "yao leyang": "yaoleyang",
+  "qiaohan": "qiaohan",
+  "qiao han": "qiaohan",
+  "tan jun hong": "junhong",
+  "wu yueze": "yueze",
+  "jingyang (bride's brother)": "jingyang",
+  "mr lee (kee siang lee)": "mrlee",
+  "depair": "pauline",
+  "autelier imelda": "imelda",
+  "mirage florist": "priscilla",
+  "victoria wedding": "scarlet",
+  "musical touch": "julian",
+  "1010media": "alistair",
+  "birds of paradise": "birds",
+  "fullerton hotel singapore": "zahera",
+  "bridesmaids & groomsmen": "bmgm",
+  "photographer": "pauline",
+};
+
+const byName = new Map();
+Object.entries(PEOPLE).forEach(([id, p]) => byName.set(p.name.toLowerCase(), id));
+
+// Resolve an id, a name, or a known alias to a person id. Returns null when the
+// token genuinely isn't a known person, so callers can fall back to a plain label.
+export function resolvePersonId(token) {
+  if (!token) return null;
+  const raw = String(token).trim();
+  if (PEOPLE[raw]) return raw;
+  const key = raw.toLowerCase();
+  if (PEOPLE[key]) return key;
+  if (ALIASES[key]) return ALIASES[key];
+  if (byName.has(key)) return byName.get(key);
+  const stripped = key.replace(/\s*\([^)]*\)/g, "").trim();
+  if (ALIASES[stripped]) return ALIASES[stripped];
+  if (byName.has(stripped)) return byName.get(stripped);
+  return null;
 }
 
-export const BRIDESMAID_NAMES = new Set();
-export const GROOMSMEN_NAMES = new Set();
-POCS.forEach((p) => {
-  p.bridesmaid.forEach((n) => BRIDESMAID_NAMES.add(stripAnnotation(n)));
-  p.groomsmen.forEach((n) => GROOMSMEN_NAMES.add(stripAnnotation(n)));
-});
+// Always returns something renderable. Unknown tokens become an "unknown"
+// person so the UI degrades to a plain label instead of breaking.
+export function getPerson(token) {
+  const id = resolvePersonId(token);
+  if (id) return { id, ...PEOPLE[id] };
+  return { id: null, name: String(token ?? "").trim(), role: "unknown" };
+}
 
-export const VENDOR_NAMES = new Set();
-VENDORS.forEach((v) => {
-  if (v.company) VENDOR_NAMES.add(v.company);
-  if (v.contact) v.contact.split("/").forEach((n) => VENDOR_NAMES.add(n.trim()));
-});
+export function personPhone(token) {
+  return getPerson(token).phone || null;
+}
 
 export function roleTagsForPoc(poc) {
   const tags = new Set();
-  (poc || []).forEach((raw) => {
-    const n = stripAnnotation(raw);
-    if (BRIDESMAID_NAMES.has(n)) tags.add("bridesmaid");
-    if (GROOMSMEN_NAMES.has(n)) tags.add("groomsmen");
-    if (VENDOR_NAMES.has(n)) tags.add("vendor");
+  (poc || []).forEach((t) => {
+    const role = getPerson(t).role;
+    if (role && role !== "unknown") tags.add(role);
   });
   return tags;
 }
 
-// Returns a phone number if `name` matches a vendor contact/company, else null.
-export function findVendorPhone(name) {
-  const n = stripAnnotation(name);
-  const match = VENDORS.find((v) => v.company === n || (v.contact && v.contact.split("/").map((s) => s.trim()).includes(n)));
-  return match?.phone ? match.phone.split("/")[0].trim() : null;
+// Every person who has at least one duty, for the "my duties" picker.
+export function peopleWithDuties(events) {
+  const ids = new Set();
+  (events || []).forEach((e) => (e.poc || []).forEach((t) => {
+    const id = resolvePersonId(t);
+    if (id && ["bridesmaid", "groomsman", "family"].includes(PEOPLE[id].role)) ids.add(id);
+  }));
+  return [...ids]
+    .map((id) => ({ id, ...PEOPLE[id] }))
+    .sort((a, b) => (a.role === b.role ? a.name.localeCompare(b.name) : a.role.localeCompare(b.role)));
 }
+
+// ---------------------------------------------------------------------------
+// Standing responsibilities — who owns what, independent of any single event.
+// `people` holds ids; the app renders them through the same chip pipeline.
+// ---------------------------------------------------------------------------
+export const POCS = [
+  { section: "Logistics",    people: ["shuyin", "justine", "junle", "clarence"],
+    role: "Main POC for bride and groom — facilitate conversations, safekeep and account for the groom's and bride's packlists" },
+  { section: "Photo-taking", people: ["shuyin", "xinxuan", "yaoleyang"],
+    role: "Bridal party photoshoot at Fullerton before solemnisation — couple, bridal party and family" },
+  { section: "Solemnisation", people: ["xinxuan", "jieyi", "aaron"],
+    role: "Manage decoration and flow — floral table set by Mirage Florist, liaise with the solemniser, march-in music (3.5mm audio jack)" },
+  { section: "Reception",    people: ["weiqing", "jieyi", "jingyang", "junhong", "yueze"],
+    role: "Reception table setup and guest seating, registration table, parking coupons, wishing cards and lucky draw, 2 laptops, safekeep 2 angbao boxes, coordinate seating changes with the banquet manager" },
+  { section: "Reception",    people: ["xinli", "mingfeng", "ryanjee", "yuntong"],
+    role: "Coordinate reception-area vendors — setup and teardown timing, wifi/water/socket points, crowd control, vendor dinners" },
+  { section: "Ballroom",     people: ["justine", "junle", "clarence", "aaron"],
+    role: "Coordinate ballroom vendors, full program flow with the emcee, cue the couple for march-ins, coordinate photographers for post-march-in photos" },
+  { section: "AV",           people: ["yaoleyang", "junhong"],
+    role: "Play videos, music and montages; own the laptop and audio feed" },
+];
+
+// ---------------------------------------------------------------------------
+// Vendors — company-level reference. Call times are NOT duplicated here any
+// more: every vendor's arrival is a real event on the timeline, so the two can
+// no longer drift apart. `people` links to the contacts above.
+// ---------------------------------------------------------------------------
+export const VENDORS = [
+  { company: "Depair",                    service: "Photographer & Videographer", people: ["pauline"] },
+  { company: "Autelier Imelda",           service: "Makeup Artist",               people: ["imelda", "jessica"] },
+  { company: "Kee Siang Lee",             service: "Solemniser",                  people: ["mrlee"] },
+  { company: "Mirage Florist",            service: "Florist",                     people: ["priscilla"] },
+  { company: "Victoria Wedding",          service: "Wedding Venue Decoration",    people: ["scarlet", "shawn"] },
+  { company: "Fullerton Hotel Singapore", service: "Banquet Manager",             people: ["zahera"] },
+  { company: "Musical Touch",             service: "Wedding Band & Emcee",        people: ["julian", "qiaohan"] },
+  { company: "1010Media",                 service: "Photobooth & Telebooth",      people: ["alistair"] },
+  { company: "Birds of Paradise",         service: "Ice Cream Live Station",      people: ["birds"] },
+];
 
 export const SEATING = {
   totalTables: 20,

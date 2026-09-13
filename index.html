@@ -34,6 +34,8 @@
         <button class="edit-schedule-btn" id="editScheduleBtn">✎ Edit schedule</button>
       </div>
 
+      <div class="filter-bar" id="filterBar"></div>
+
       <div class="editor-bar" id="editorBar">
         <span id="editorWhoami">Editing enabled</span>
         <div style="display:flex; gap:8px;">
@@ -100,7 +102,9 @@
           <label for="evSection">Section</label>
           <select id="evSection">
             <option value="Morning">Morning</option>
+            <option value="Afternoon">Afternoon</option>
             <option value="Solemnisation">Solemnisation</option>
+            <option value="Reception">Reception</option>
             <option value="Dinner">Dinner</option>
           </select>
         </div>
@@ -112,6 +116,13 @@
             <option value="groom">Groom's side</option>
           </select>
         </div>
+      </div>
+      <div class="field">
+        <label for="evTrack">Track</label>
+        <select id="evTrack">
+          <option value="program">Program — guest-facing</option>
+          <option value="setup">Setup — backstage / vendor work</option>
+        </select>
       </div>
       <div class="field">
         <label for="evTitle">Title</label>
@@ -126,7 +137,7 @@
         <input type="text" id="evDeadline" placeholder="e.g. Leave by 7:50 AM" />
       </div>
       <div class="field">
-        <label for="evPoc">Person in charge (comma separated)</label>
+        <label for="evPoc">Person in charge (comma separated — names are matched to the roster)</label>
         <input type="text" id="evPoc" />
       </div>
       <div class="field">
