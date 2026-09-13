@@ -7,8 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { FIREBASE_CONFIG } from "./firebase-config.js";
 import {
-  WEDDING_DATE, SEATING, PEOPLE,
-  getPerson, personPhone, resolvePersonId, peopleWithDuties,
+  WEDDING_DATE, SEATING, getPerson, personPhone, resolvePersonId,
 } from "./data.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
@@ -19,10 +18,6 @@ let events = [];
 let isEditor = false;
 let currentEditId = null;
 let hasAutoScrolled = false;
-// View filters — "setup" work is hidden by default so the timeline reads as the
-// guest-facing flow; organisers toggle it back on.
-let showSetup = false;
-let focusPersonId = null;
 
 // ---------- helpers ----------
 function escapeHtml(str) {
@@ -44,22 +39,12 @@ function fmtDuration(ms) {
   const h = Math.floor(totalMin / 60); const m = totalMin % 60;
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
-// The list the timeline actually renders: setup work hidden unless asked for,
-// narrowed to one person when "my duties" is active.
-function visibleEvents() {
-  let list = sortedEvents();
-  if (!showSetup) list = list.filter((e) => (e.track || "program") !== "setup");
-  if (focusPersonId) {
-    list = list.filter((e) => (e.poc || []).some((t) => resolvePersonId(t) === focusPersonId));
-  }
-  return list;
-}
 function sortedEvents() {
   return events.slice().sort((a, b) => (a.start !== b.start ? a.start.localeCompare(b.start) : (a.order ?? 0) - (b.order ?? 0)));
 }
 function pocChip(token) {
   const p = getPerson(token);
-  const cls = `chip role-${p.role}${p.id === focusPersonId ? " focus" : ""}`;
+  const cls = `chip role-${p.role}`;
   const label = escapeHtml(p.name);
   return p.phone
     ? `<button type="button" class="${cls} tappable" data-action="poc" data-token="${escapeHtml(token)}" title="${escapeHtml(p.company || p.note || "")}">${label} ☎</button>`
@@ -104,7 +89,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 // ---------- now/next bar ----------
 function renderNowNextBar() {
   const bar = document.getElementById("nowNextBar");
-  const list = visibleEvents();
+  const list = sortedEvents();
   if (!list.length) { bar.textContent = "Schedule not loaded yet."; return; }
   const now = new Date();
   const first = withDate(list[0].start);
@@ -176,46 +161,11 @@ function buildEventCard(ev, now, nextId, handoffWarnings) {
     </article>`;
 }
 
-// ---------- filter bar ----------
-// Two controls that matter on the day: whose duties am I looking at, and do I
-// want the backstage setup work mixed in.
-function renderFilterBar() {
-  const root = document.getElementById("filterBar");
-  if (!root) return;
-  const people = peopleWithDuties(events);
-  const setupCount = sortedEvents().filter((e) => (e.track || "program") === "setup").length;
-  root.innerHTML = `
-    <label class="filter-field">
-      <span>Show duties for</span>
-      <select id="personFilter">
-        <option value="">Everyone</option>
-        ${people.map((p) => `<option value="${p.id}" ${p.id === focusPersonId ? "selected" : ""}>${escapeHtml(p.name)}</option>`).join("")}
-      </select>
-    </label>
-    <button type="button" class="filter-toggle ${showSetup ? "on" : ""}" id="setupToggle">
-      ${showSetup ? "✓ " : ""}Setup &amp; vendor work${setupCount ? ` (${setupCount})` : ""}
-    </button>`;
-  document.getElementById("personFilter").addEventListener("change", (e) => {
-    focusPersonId = e.target.value || null;
-    hasAutoScrolled = true;
-    renderTimeline();
-  });
-  document.getElementById("setupToggle").addEventListener("click", () => {
-    showSetup = !showSetup;
-    hasAutoScrolled = true;
-    renderTimeline();
-  });
-}
-
 function renderTimeline() {
   const root = document.getElementById("timelineRoot");
-  renderFilterBar();
-  const list = visibleEvents();
+  const list = sortedEvents();
   if (!list.length) {
-    const why = focusPersonId
-      ? `No duties listed for <b>${escapeHtml(PEOPLE[focusPersonId]?.name || "")}</b>${showSetup ? "" : " in the guest-facing flow — try showing setup work"}.`
-      : `No events yet.${isEditor ? " Tap Edit schedule to start." : ""}`;
-    root.innerHTML = `<p class="empty-note">${why}</p>`;
+    root.innerHTML = `<p class="empty-note">No events yet.${isEditor ? " Tap Edit schedule to start." : ""}</p>`;
     renderNowNextBar();
     return;
   }

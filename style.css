@@ -317,56 +317,9 @@ section.view.active { display: block; }
 .chip.role-couple     { border-color: var(--accent-2); color: var(--accent-2); background: transparent; }
 .chip.role-group      { border-style: dashed; color: var(--text-muted); }
 .chip.role-unknown    { border-style: dotted; color: var(--text-muted); }
-.chip.focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-  font-weight: 600;
-}
 
 .badge.setup { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
 .ev-card .badge.setup + * { opacity: 1; }
-
-/* ---------- Filter bar ---------- */
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin: 0 0 14px;
-  padding: 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-.filter-field { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
-.filter-field select {
-  font: inherit;
-  font-size: 13px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text);
-  max-width: 190px;
-}
-.filter-toggle {
-  font: inherit;
-  font-size: 13px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-muted);
-  cursor: pointer;
-  margin-left: auto;
-}
-.filter-toggle.on { border-color: var(--accent); color: var(--accent); background: var(--next-bg); }
-@media (max-width: 480px) {
-  .filter-toggle { margin-left: 0; }
-  .filter-field select { max-width: 100%; flex: 1; }
-  .filter-field { width: 100%; }
-}
 
 .ev-card .edit-controls { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 
