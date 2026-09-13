@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Weiye &amp; Madeline's Wedding Day</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <span class="names">Weiye &amp; Madeline</span>
+    <span class="date">Sunday, 20 September 2026</span>
+  </header>
+
+  <div class="now-next-bar" id="nowNextBar">Loading schedule…</div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="timeline">Timeline</button>
+    <button class="tab-btn" data-view="seating">Seating</button>
+  </nav>
+
+  <main class="wrap">
+    <section class="view active" id="view-timeline">
+      <div class="timeline-controls">
+        <div class="legend">
+          <span class="legend-item"><i class="swatch bride"></i>Bride's side</span>
+          <span class="legend-item"><i class="swatch groom"></i>Groom's side</span>
+          <span class="legend-item"><i class="swatch everyone"></i>Everyone</span>
+        </div>
+        <button class="edit-schedule-btn" id="editScheduleBtn">✎ Edit schedule</button>
+      </div>
+
+      <div class="editor-bar" id="editorBar">
+        <span id="editorWhoami">Editing enabled</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn small primary" id="addEventBtn">+ Add event</button>
+          <button class="btn small ghost" id="logoutBtn">Log out</button>
+        </div>
+      </div>
+
+      <div id="timelineRoot"><p class="empty-note">Loading…</p></div>
+    </section>
+
+    <section class="view" id="view-seating">
+      <div class="seating-summary">
+        <div class="stat"><b id="seatTables">–</b><span>Tables</span></div>
+        <div class="stat"><b id="seatPax">–</b><span>Guests</span></div>
+      </div>
+      <p class="floorplan-hint">Tap a table to see its details</p>
+      <div class="floorplan" id="floorplanRoot"></div>
+      <h3 class="group-title">All tables</h3>
+      <div class="table-grid" id="seatingRoot"></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="tableModal">
+    <div class="modal">
+      <h3 id="tableModalTitle"></h3>
+      <div id="tableModalBody"></div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="tableModalClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal">
+      <h3>Enter organizer password</h3>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" />
+      </div>
+      <p class="modal-error" id="loginError" style="display:none;"></p>
+      <div class="modal-actions">
+        <button class="btn primary" id="loginSubmit">Unlock editing</button>
+        <button class="btn ghost" id="loginCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="eventModal">
+    <div class="modal">
+      <h3 id="eventModalTitle">Edit event</h3>
+      <div class="field-row">
+        <div class="field">
+          <label for="evStart">Start time</label>
+          <input type="time" id="evStart" />
+        </div>
+        <div class="field">
+          <label for="evEnd">End time</label>
+          <input type="time" id="evEnd" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="evSection">Section</label>
+          <select id="evSection">
+            <option value="Morning">Morning</option>
+            <option value="Solemnisation">Solemnisation</option>
+            <option value="Dinner">Dinner</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="evSide">Side</label>
+          <select id="evSide">
+            <option value="everyone">Everyone</option>
+            <option value="bride">Bride's side</option>
+            <option value="groom">Groom's side</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="evTitle">Title</label>
+        <input type="text" id="evTitle" />
+      </div>
+      <div class="field">
+        <label for="evLocation">Location</label>
+        <input type="text" id="evLocation" />
+      </div>
+      <div class="field">
+        <label for="evDeadline">Deadline (optional — a critical cutoff to highlight)</label>
+        <input type="text" id="evDeadline" placeholder="e.g. Leave by 7:50 AM" />
+      </div>
+      <div class="field">
+        <label for="evPoc">Person in charge (comma separated)</label>
+        <input type="text" id="evPoc" />
+      </div>
+      <div class="field">
+        <label for="evTasks">Tasks / prep notes (one line per point)</label>
+        <textarea id="evTasks"></textarea>
+      </div>
+      <div class="field">
+        <label for="evStatus">Status</label>
+        <select id="evStatus">
+          <option value="">Scheduled</option>
+          <option value="done">Done</option>
+          <option value="delayed">Delayed</option>
+        </select>
+      </div>
+      <p class="modal-error" id="eventError" style="display:none;"></p>
+      <div class="modal-actions">
+        <button class="btn primary" id="eventSave">Save</button>
+        <button class="btn ghost" id="eventCancel">Cancel</button>
+        <button class="btn danger" id="eventDelete" style="display:none;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
